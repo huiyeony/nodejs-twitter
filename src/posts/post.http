@@ -1,0 +1,23 @@
+###
+POST http://localhost:4000/post/create
+Content-Type: application/json
+
+{
+    "username":"username",
+    "content":"test"
+
+}
+
+####
+GET http://localhost:4000/post/
+
+###
+PUT http://localhost:4000/post/1
+Content-Type: application/json
+
+{
+    "content" :"변경된 게시물"
+}
+
+###
+DELETE http://localhost:4000/post/2

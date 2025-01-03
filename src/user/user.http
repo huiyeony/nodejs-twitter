@@ -1,0 +1,17 @@
+###유저 생성
+POST http://localhost:4000/user/create
+Content-Type: application/json
+
+{
+    "email" : "andy@podo.com",
+    "username": "andy",
+    "password":"andy111"
+}
+
+
+
+###유저 정보 가져오기
+GET http://localhost:4000/user/get/andy@podo.com
+
+###유저 정보 삭제
+DELETE http://localhost:4000/user/delete/andy11@podo.com
