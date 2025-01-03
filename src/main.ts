@@ -18,7 +18,7 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://next-twitter.onrender.com'],
+    origin: ['http://localhost:3000'],
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
     credentials: true,
   });

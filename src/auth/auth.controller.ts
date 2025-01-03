@@ -26,6 +26,7 @@ export class AuthController {
         maxAge: 1000 * 60 * 60 * 24,
       });
     }
+    console.log('login request received');
     res.send({ user: req.user });
   }
 
