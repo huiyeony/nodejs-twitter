@@ -18,7 +18,10 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.enableCors({
-    origin: 'https://twitter-4rf4mwv1k-yangheeyeons-projects.vercel.app',
+    origin: [
+      'http://localhost:3000',
+      'https://twitter-4rf4mwv1k-yangheeyeons-projects.vercel.app',
+    ],
     credentials: true,
   });
   app.useWebSocketAdapter(new IoAdapter(app));
