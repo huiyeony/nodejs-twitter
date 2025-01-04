@@ -12,7 +12,6 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
     credentials: true,
   });
-  app.useStaticAssets(join(__dirname, '..', 'static'));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
