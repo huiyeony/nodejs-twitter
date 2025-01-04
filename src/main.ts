@@ -21,6 +21,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.useWebSocketAdapter(new IoAdapter(app));
+
   await app.listen(process.env.PORT || 4000);
 }
 bootstrap();

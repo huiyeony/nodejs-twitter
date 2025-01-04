@@ -6,7 +6,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { CreatePostDto } from './posts/post.dto';
+import { CreatePostDto } from '../src/posts/post.dto';
 
 @WebSocketGateway()
 export class AppGateway {

@@ -6,7 +6,7 @@ import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/user.entity';
 import { ConfigModule } from '@nestjs/config';
-import { AppGateway } from './app.gateway';
+import { AppGateway } from '../app/app.gateway';
 import { PostModule } from './posts/post.module';
 import { Post } from './posts/post.entity';
 
