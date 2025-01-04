@@ -11,7 +11,7 @@ Content-Type: application/json
 
 
 ###유저 정보 가져오기
-GET http://localhost:4000/user/get/andy@podo.com
+GET https://sheep.up.railway.app:4000/user/get/andy@podo.com
 
 ###유저 정보 삭제
 DELETE http://localhost:4000/user/delete/andy11@podo.com

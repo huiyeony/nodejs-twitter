@@ -8,7 +8,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://wssheep.up.railway.app:3000'],
+    origin: ['http://localhost:3000', 'https://wssheep.up.railway.app:8080'],
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
     credentials: true,
   });
