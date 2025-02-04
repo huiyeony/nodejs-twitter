@@ -1,10 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreatePostDto {
-  // @IsString()
-  // @IsNotEmpty()
-  // title: string;
-
   @IsString()
   @IsNotEmpty()
   content: string;
@@ -13,15 +9,11 @@ export class CreatePostDto {
   @IsNotEmpty()
   username: string;
 
-  // @IsString()
-  // @IsNotEmpty()
-  // handle: string;
+  @IsString()
+  @IsOptional()
+  image: string | null;
 }
 export class UpdatePostDto {
-  // @IsString()
-  // @IsNotEmpty()
-  // title: string;
-
   @IsString()
   @IsNotEmpty()
   content: string;

@@ -1,3 +1,4 @@
+import { S3Service } from './s3.service';
 import { CreatePostDto, UpdatePostDto } from './post.dto';
 import {
   Body,
@@ -8,32 +9,39 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PostService } from './post.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('post')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly s3Service: S3Service,
+  ) {}
 
-  @Get(`/newer`)
-  async getNewerPosts(
-    @Query(`latestId`) latestId: number | null,
-    @Query(`limit`) limit: number | null,
-  ) {
-    if (!limit) limit = 20;
-
-    return this.postService.getNewerPosts(latestId, limit);
-  }
   @Get(`/initial`)
-  async getInitialPosts(@Query(`limit`) limit: number | null) {
-    return this.postService.getInitialPosts(limit);
+  async getInitialPosts() {
+    return this.postService.getInitialPosts(20);
   }
-  @Post(`/:id/like`)
-  async toggleLiked(@Param('id') id: number) {
-    //return await this.postService.toggleLiked()
+
+  @Post('/image/upload')
+  @UseInterceptors(FileInterceptor(`image`))
+  async upload(@UploadedFile() file: Express.Multer.File) {
+    return await this.s3Service.uploadFile(file); //
   }
   @Post('/create')
-  async create(@Body() postDto: CreatePostDto) {
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() postDto: CreatePostDto,
+  ) {
+    if (file) {
+      const image = await this.upload(file);
+      return await this.postService.create({ ...postDto, image });
+    }
     return await this.postService.create(postDto);
   }
   @Get('/:id')

@@ -9,16 +9,16 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
   ) {}
-  async getNewerPosts(latestId: number | null, limit: number | null) {
+  async getMorePosts(latestId: number | null, limit: number | null) {
     //sql
     const queryBuilder = this.postRepository.createQueryBuilder(`post`);
     if (latestId) {
-      queryBuilder.where('post.id > :latestId', { latestId });
+      console.log(`latest Id => ${latestId}`);
+      queryBuilder.where('post.id > :pivotId', { latestId });
     }
     return queryBuilder.orderBy('post.id', 'DESC').take(limit).getMany();
   }
   async getInitialPosts(limit: number) {
-    if (!limit) limit = 20;
     //sql
     const queryBuilder = this.postRepository.createQueryBuilder('post');
     return queryBuilder.orderBy('post.id', 'DESC').take(limit).getMany();
