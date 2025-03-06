@@ -1,5 +1,5 @@
 import { S3Service } from './s3.service';
-import { CreatePostDto, UpdatePostDto } from './post.dto';
+import { CreatePostDto, PaginationQueryDto, UpdatePostDto } from './post.dto';
 import {
   Body,
   Controller,
@@ -22,11 +22,6 @@ export class PostController {
     private readonly s3Service: S3Service,
   ) {}
 
-  @Get(`/initial`)
-  async getInitialPosts() {
-    return this.postService.getInitialPosts(20);
-  }
-
   @Post('/image/upload')
   @UseInterceptors(FileInterceptor(`image`))
   async upload(@UploadedFile() file: Express.Multer.File) {
@@ -47,6 +42,10 @@ export class PostController {
   @Get('/:id')
   async getOne(@Param('id') id: number) {
     return await this.postService.getOne(id);
+  }
+  @Get()
+  async getPosts(@Query() paginationQuery: PaginationQueryDto) {
+    return this.postService.getPosts(paginationQuery);
   }
   @Get('/')
   async getAll() {

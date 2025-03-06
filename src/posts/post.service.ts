@@ -2,29 +2,42 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreatePostDto, UpdatePostDto } from './post.dto';
+import {
+  CreatePostDto,
+  PaginationQueryDto,
+  PaginationResponseDto,
+  UpdatePostDto,
+} from './post.dto';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
   ) {}
-  async getMorePosts(latestId: number | null, limit: number | null) {
-    //sql
-    const queryBuilder = this.postRepository.createQueryBuilder(`post`);
-    if (latestId) {
-      console.log(`latest Id => ${latestId}`);
-      queryBuilder.where('post.id > :pivotId', { latestId });
-    }
-    return queryBuilder.orderBy('post.id', 'DESC').take(limit).getMany();
-  }
-  async getInitialPosts(limit: number) {
-    //sql
-    const queryBuilder = this.postRepository.createQueryBuilder('post');
-    return queryBuilder.orderBy('post.id', 'DESC').take(limit).getMany();
-  }
+
   async create(postDto: CreatePostDto) {
     return await this.postRepository.save(postDto);
+  }
+  async getPosts(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResponseDto> {
+    const { page = 1, limit = 10 } = paginationQuery;
+    const skip = (page - 1) * limit;
+    // 게시물과 총 개수를 함께 가져옴
+    const [posts, totalPosts] = await this.postRepository.findAndCount({
+      select: ['id', 'username', 'createdAt', 'content', 'image'],
+      order: { createdAt: 'DESC' }, // 최신 게시물 먼저
+      skip,
+      take: limit,
+    });
+    // 전체 페이지 수 계산
+    const totalPages = Math.ceil(totalPosts / limit);
+    return {
+      posts,
+      totalPosts,
+      totalPages,
+      currentPage: page,
+    };
   }
   async getOne(id: number): Promise<Post> {
     return await this.postRepository.findOne({ where: { id } });
