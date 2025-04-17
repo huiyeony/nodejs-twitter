@@ -4,7 +4,9 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-import { IoAdapter } from '@nestjs/platform-socket.io';
+import * as session from 'express-session';
+import * as passport from 'passport';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors({
@@ -19,8 +21,21 @@ async function bootstrap() {
     }),
   );
   app.use(cookieParser());
+  app.use(
+    session({
+      secret: 'your-secret-key',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        maxAge: 3600000, // 1시간
+      },
+    }),
+  );
 
-  app.useWebSocketAdapter(new IoAdapter(app));
+  // Passport 초기화 및 세션 사용
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   await app.listen(process.env.PORT || 4000);
 }

@@ -4,6 +4,10 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
+  @Column()
+  title: string;
+  @Column()
+  category: string;
   //유저
   @Column()
   username: string;
@@ -16,4 +20,8 @@ export class Post {
 
   @Column({ nullable: true })
   image: string;
+  @Column({ type: 'integer', default: 0 })
+  likes: number;
+  @Column({ type: 'integer', default: 0 })
+  comments: number;
 }

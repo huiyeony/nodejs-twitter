@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   Request,
   Response,
@@ -8,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from 'src/user/user.dto';
 import { AuthService } from './auth.service';
-import { LoginGuard } from './auth.guard';
+import { AuthenticatedGuard, LocalAuthGuard } from './guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -18,23 +19,31 @@ export class AuthController {
     return await this.authService.register(user);
   }
   @Post('/login')
-  @UseGuards(LoginGuard)
+  @UseGuards(LocalAuthGuard)
   login(@Request() req, @Response() res) {
-    if (!req.cookies['login'] && req.user) {
-      res.cookie('login', {
+    //로그인이 성공시 세션이 자동으로 생성됩니다
+    req.session.save(() => {
+      // 명시적으로 쿠키 설정
+      res.cookie('connect.sid', req.sessionID, {
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24,
+        maxAge: 3600000,
+        secure: false,
+        sameSite: 'lax',
       });
-    }
-    console.log('login request received');
+      res.send({ user: req.user, message: '로그인 성공' });
+    });
+  }
+  @Get('profile')
+  @UseGuards(AuthenticatedGuard)
+  profile(@Request() req, @Response() res) {
+    console.log('로그인 성공, 사용자:', req.user);
+    console.log('세션 ID:', req.sessionID);
+    console.log('세션 내용:', req.session);
     res.send({ user: req.user });
   }
-
-  @Post('/test-guard')
-  @UseGuards(LoginGuard)
-  test(@Request() req, @Response() res) {
-    res.json({
-      message: '로그인이 성공하면 보입니다',
-    });
+  @Post('logout')
+  logout(@Request() req, @Response() res) {
+    res.clearCookie('connect.sid'); // 기본  쿠키 이름
+    res.send({ message: '로그아웃 성공' });
   }
 }
