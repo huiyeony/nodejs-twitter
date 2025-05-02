@@ -13,7 +13,6 @@ import { PassportModule } from '@nestjs/passport';
   imports: [
     TypeOrmModule.forFeature([Post, Like]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-
     LikeModule,
   ],
   controllers: [PostController],

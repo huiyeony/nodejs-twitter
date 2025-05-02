@@ -14,6 +14,9 @@ import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // process.env
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       autoLoadEntities: true,
@@ -24,7 +27,7 @@ import { PassportModule } from '@nestjs/passport';
     PassportModule,
     UserModule,
     AuthModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     PostModule,
     LikeModule,
   ],

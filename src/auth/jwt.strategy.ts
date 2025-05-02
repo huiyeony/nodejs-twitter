@@ -14,6 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     // 여기에 넣은 객체가 req.user가 됩니다
+    console.log(payload);
     return { userId: payload.userId, email: payload.email };
   }
 }
