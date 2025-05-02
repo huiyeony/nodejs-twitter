@@ -11,10 +11,12 @@ import {
   Query,
   Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('post')
 export class PostController {
@@ -46,6 +48,7 @@ export class PostController {
   }
 
   @Get('/')
+  @UseGuards(AuthGuard())
   async getPosts(
     @Query('currentPage') currentPage: number = 1,
     @Query('limit') limit: number = 10,
