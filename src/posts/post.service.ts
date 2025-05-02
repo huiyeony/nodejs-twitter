@@ -1,5 +1,6 @@
+import { LikeService } from './../likes/like.service';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -9,11 +10,13 @@ import {
   UpdatePostDto,
   UserPostsQueryDto,
 } from './post.dto';
+import { Like } from 'src/likes/like.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
+    @InjectRepository(Like) private readonly likeRepository: Repository<Like>,
   ) {}
 
   async create(postDto: CreatePostDto) {
@@ -39,54 +42,57 @@ export class PostService {
       currentPage: page,
     };
   }
-  async getPostsWithParams(
-    params: GetPostsParams,
-  ): Promise<GetPostParamResponse> {
-    const { currentPage, limit, category, sort } = params;
-    // 페이지네이션을 위한 스킵 값 계산
-    const skip = currentPage - 1 * limit;
-
-    // 쿼리 빌더 생성
+  async getPosts({ userId, currentPage, limit, category, sort }) {
+    // 쿼리 생성
     const queryBuilder = this.postRepository.createQueryBuilder('post');
 
-    // 카테고리 필터 적용(있는 경우)
+    // 카테코리 쿼리 수행
     if (category) {
       queryBuilder.where('post.category = :category', {
         category,
       });
     }
 
-    // 정렬 적용
+    // 데이터 정렬
     if (sort === 'latest') {
       queryBuilder.orderBy('post.createdAt', 'DESC');
     } else if (sort === 'popular') {
       queryBuilder.orderBy('post.likes', 'DESC');
     }
-
-    // 페이지네이션 적용
+    // 스킵 값 계산
+    const skip = currentPage - 1 * limit;
+    // 스킵 쿼리 수행
     queryBuilder.skip(Number(skip)).take(Number(limit));
 
-    // 쿼리 실행
+    // 쿼리 데이터 반환
     const [posts, totalCount] = await queryBuilder.getManyAndCount();
 
-    console.log(posts.length);
-    const [query, parameters] = queryBuilder.getQueryAndParameters();
-    console.log('Query:', query);
-    console.log('Parameters:', parameters);
-    // 전체 페이지 수 계산
-    const totalPages = Math.ceil(totalCount / limit);
+    const postIds = posts.map((post) => post.id);
+    const likedList = await this.likeRepository.find({
+      where: { userId, postId: In(postIds) },
+      select: ['postId'],
+    });
+    const likedMap = new Set(likedList.map((like) => like.postId));
+    const postsWithIsLiked = posts.map((post) => ({
+      ...post,
+      isLiked: likedMap.has(post.id),
+    }));
+
     return {
-      posts,
-      totalPages,
+      posts: postsWithIsLiked,
+      totalPages: Math.ceil(totalCount / limit),
       currentPage,
     };
   }
+  //id 게시글 불러오기
   async getOne(id: number): Promise<Post> {
     return await this.postRepository.findOne({ where: { id } });
   }
+  //모든 게시글 불러오기
   async getAll(): Promise<Post[]> {
     return await this.postRepository.find({});
   }
+  //게시글 변경
   async update(id: number, updatePost: UpdatePostDto) {
     const post = await this.getOne(id);
     //내용
@@ -97,6 +103,7 @@ export class PostService {
 
     return await this.postRepository.save(post);
   }
+  //게시글 삭제
   async delete(id: number) {
     return await this.postRepository.delete({ id });
   }

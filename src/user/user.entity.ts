@@ -13,4 +13,6 @@ export class User {
 
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   createdDt: Date;
+  @Column({ default: 0 })
+  likes: number;
 }

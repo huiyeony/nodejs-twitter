@@ -1,38 +1,45 @@
-import { HttpException, Injectable } from '@nestjs/common';
-import { User } from 'src/user/user.entity';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from 'src/user/user.dto';
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
-  async register(user: CreateUserDto): Promise<User> {
-    const _user = await this.userService.getUser(user.email);
-    console.log(_user);
-    //이미 가입된 유저
-    if (_user) {
-      //message, status
-      throw new HttpException('이미 존재하는 유저입니다', 403);
-    }
-    const encryped = bcrypt.hashSync(user.password, 10);
-    const newUser = await this.userService.createUser({
-      ...user,
-      password: encryped,
-    });
-    newUser.password = undefined;
-    return newUser;
-  }
-  async validateUser(email: string, password: string): Promise<User> {
-    //이메일과 패스워드를 맞게 입력했는지 테스트
-    const user = await this.userService.getUser(email);
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-    if (!user) {
-      return null;
-    }
-    const { password: encrypedPassword, ...userInfo } = user;
-    if (bcrypt.compareSync(password, encrypedPassword)) {
-      return user;
-    }
-    return null;
+  async validateUser(email, password) {
+    //존재하는 유저
+    const user = await this.userService.getUser(email);
+    if (!user) return null;
+    //일치하는 비밀번호
+    const isTrue = await bcrypt.compare(password, user.password);
+    if (!isTrue) return null;
+
+    const payload = { userId: user.id, email: user.email };
+    return this.jwtService.sign(payload); //문자열 반환
+  }
+  async register(email, password, username) {
+    //이미 존재하는 유저인지
+    const user = await this.userService.getUser({ email });
+    if (user) throw new ConflictException('이미 존재하는 유저');
+
+    const bcryptPwd = await bcrypt.hash(password, 10);
+    //새로운 유저
+    const newUser = await this.userService.createUser({
+      username,
+      email,
+      password: bcryptPwd,
+    });
+    //바로 로그인
+    return {
+      user: {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+      },
+      token: this.jwtService.sign({ username, email }),
+    };
   }
 }

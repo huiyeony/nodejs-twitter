@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -43,26 +44,17 @@ export class PostController {
   async getOne(@Param('id') id: number) {
     return await this.postService.getOne(id);
   }
-  //url 파라미터 방식
-  @Get('user/:username')
-  async getPostsByUsername(
-    @Param('username') username: string,
-    @Query() params: GetPostsParams,
-  ) {
-    return this.postService.getPostsByUsername({
-      username,
-      page: params.currentPage,
-      limit: params.limit,
-    });
-  }
+
   @Get('/')
-  async getPostsWithParams(
+  async getPosts(
     @Query('currentPage') currentPage: number = 1,
     @Query('limit') limit: number = 10,
     @Query('category') category: string,
     @Query('sort') sort: 'latest' | 'popular' = 'latest',
+    @Req() req,
   ) {
-    return await this.postService.getPostsWithParams({
+    return await this.postService.getPosts({
+      userId: req.user.userId,
       currentPage,
       limit,
       category,
