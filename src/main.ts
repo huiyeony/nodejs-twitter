@@ -13,6 +13,7 @@ async function bootstrap() {
     origin: ['http://localhost:3000', 'https://wssheep.up.railway.app'],
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
   app.useStaticAssets(join(__dirname, '..', 'static'));
   app.useGlobalPipes(

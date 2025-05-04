@@ -56,7 +56,7 @@ export class PostController {
     @Query('sort') sort: 'latest' | 'popular' = 'latest',
     @Req() req,
   ) {
-    console.log(req.user.userId);
+    console.log(`유저 아이디 -> ${req.user.userId}`);
     return await this.postService.getPosts({
       userId: req.user.userId,
       currentPage,
